@@ -18,6 +18,9 @@ opts.fn = function () {
     return this.tags[1];
   }
 }
+opts.clean = function(val){
+	return val.replace(/[^\w\d\s]|_/g, '');
+}
 
 schema.plugin(keywords, opts);
 
@@ -121,6 +124,24 @@ describe('plugin', function () {
       });
     });
   });
+
+	describe('callback options', function(){
+//		it('should have an fn callback - not sure what this could be used for'),
+		
+		it('should have a clean callback that removes unecessary stuff from keywords (ex: punctuation)', function(done){
+			var p = new Person({ name: { last: 'a. ghiu++' } });
+			p.keywords.should.have.length(0);
+			p.save(function(err){
+				should.not.exist(err);
+				
+				console.log(p.keywords);
+				p.keywords.should.have.length(2);
+				
+				done();
+			})
+			
+		})
+	});
 
   after(function () {
     mongoose.disconnect();
