@@ -126,20 +126,36 @@ describe('plugin', function () {
   });
 
 	describe('callback options', function(){
-//		it('should have an fn callback - not sure what this could be used for'),
-		
-		it('should have a clean callback that removes unecessary stuff from keywords (ex: punctuation)', function(done){
-			var p = new Person({ name: { last: 'a. ghiu++' } });
-			p.keywords.should.have.length(0);
+	
+		it('should have a filter option where value can be changed altogether', function(done){
+			var schema = new Schema({
+				title		: String,
+				description	: String
+			});
+			var options = {
+				fields: [ 'title', 'description' ],
+				filter: function(values){
+					for(var i = 0; i < values.length; i++){
+						values[i] = values[i].replace(/[^\w\d\s]|_/g, '');
+					}
+					return values;
+				}
+			}
+			schema.plugin(keywords, options);
+			
+			var Post = mongoose.model('Post', schema);
+			var p = new Post({
+				title		: 'testing: filter',
+				description	: 'punctuation... should be stripped!'
+			});
+			p.keywords.should.have.length( 0 );
 			p.save(function(err){
-				should.not.exist(err);
-				
-				console.log(p.keywords);
-				p.keywords.should.have.length(2);
+				if(err) return next(err);
+				p.keywords.should.have.length( 6 );
+				p.keywords.should.includeEql('punctuation');
 				
 				done();
 			})
-			
 		})
 	});
 
