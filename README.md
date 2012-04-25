@@ -8,6 +8,7 @@ Options:
 
   - fields: an array of paths you want watched and converted into keywords
   - fn: a custom function to execute when keywordize() runs
+  - filter: a custom function where you can filter and then replace the values that will be converted into keywords
 
 Example:
 
@@ -46,6 +47,12 @@ opts.fn = function custom () {
   if ('Mister' === this.title) {
     return 'Mr';
   }
+}
+opts.filter = function(values){
+  for(var i = 0; i < values.length; i++){
+    values[i] = values[i].replace(/[^\w\d\s]|_/g, '');
+  }
+  return values;
 }
 var schema = new Schema({ name: String, title: String });
 schema.plugin(keywordize, opts);
